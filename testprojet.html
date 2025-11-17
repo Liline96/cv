@@ -6,7 +6,6 @@
     <title>Project Anime.js of A. Rotin</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -14,41 +13,28 @@
             margin: 0;
             background-color: #f4f4f9;
         }
-        form {
-            background: #fff;
-            padding: 20px;
+          svg {
+            width: 80vw;
+            height: 80vh;
             border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        input, button {
-            display: block;
-            width: 100%;
-            margin-bottom: 15px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        button {
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }  
+      
+      
+      
     </style>
 </head>
+  
 <body>
-    <svg viewBox="0 0 304 112">
-        <g stroke-width="2" stroke="currentColor" stroke-linejoin="round" fill="none" fill-rule="evenodd">
+    <svg id="zone" viewBox="0 0 304 112">
+        <g id="poly" stroke-width="3" stroke="currentColor" stroke-linejoin="round" fill="none" fill-rule="evenodd">
             <polygon id="path-1" points="152,4 170,38 204,56 170,74 152,108 134,74 100,56 134,38"></polygon>
             <polygon style="opacity: 0" id="path-2" points="152,4 170,38 204,56 170,74 152,108 134,74 100,56 134,38"></polygon>
         </g>
     </svg>
 
     <script type="module">
-import { animate, svg, utils } from 'https://esm.sh/animejs';
+import { animate, svg, utils, createAnimatable } from 'https://esm.sh/animejs';
 
 const [ $path1, $path2 ] = utils.$('polygon');
 
@@ -69,6 +55,7 @@ const [ $path1, $path2 ] = utils.$('polygon');
 
         // A function to generate random points on #path-2 on each iteration
         // For demo purpose only
+        
         function generatePoints() {
         const total = utils.random(4, 64);
         const r1 = utils.random(4, 56);
@@ -84,6 +71,38 @@ const [ $path1, $path2 ] = utils.$('polygon');
         }
         return points;
         }
+        
+        //Code Mouvement
+        
+        const $zone = document.querySelector('#zone'); 
+        const $poly = document.querySelector('#poly');
+        
+        let bounds = $zone.getBoundingClientRect();
+        const refreshBounds = () => bounds = $zone.getBoundingClientRect();
+        
+        const polyanim = createAnimatable($poly,{
+        x: 500,
+        y: 500,
+        ease: 'out(3)',
+        });
+        
+               
+        const onMouseMove = e => {
+            const { width, height, left, top } = bounds;
+            const hw = width / 2;
+            const hh = height / 2;           
+            const x = utils.clamp(e.clientX - left - hw, -hw, hw);
+            const y = utils.clamp(e.clientY - top - hh, -hh, hh);
+            polyanim.x(x);
+            polyanim.y(y);
+        }
+       
+        
+       window.addEventListener('mousemove', onMouseMove);
+       $demos.addEventListener('scroll', refreshBounds);
+       
+       windows.addEventListener("click", );  
+             
     </script>
 </body>
 </html>
