@@ -13,15 +13,16 @@
             margin: 0;
             background-color: #f4f4f9;
         }
-          svg {
+         svg {
             width: 80vw;
             height: 80vh;
             border-radius: 8px;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-        }  
+            cursor: circle; /
+        }   
     </style>
 </head>
-  
+    
 <body>
     <svg id="zone" viewBox="0 0 304 112">
         <g id="poly" stroke-width="3" stroke="currentColor" stroke-linejoin="round" fill="none" fill-rule="evenodd">
@@ -36,70 +37,74 @@ import { animate, svg, utils, createAnimatable } from 'https://esm.sh/animejs';
 const [ $path1, $path2 ] = utils.$('polygon');
 
         function animateRandomPoints() {
-        // Update the points attribute on #path-2
-        utils.set($path2, { points: generatePoints() });
-        // Morph the points of #path-1 into #path-2
-        animate($path1, {
-            points: svg.morphTo($path2),
-            ease: 'inOutCirc',
-            duration: 500,
-            onComplete: animateRandomPoints
-        }); 
-        }
+         // change color randomly
+         const randomColor = `hsl(${utils.random(0, 360)}, 70%, 50%)`;
+         $path1.style.stroke = randomColor;
+        
+         // Update the points attribute on #path-2
+         utils.set($path2, { points: generatePoints() });
+         // Morph the points of #path-1 into #path-2
+         animate($path1, {
+             points: svg.morphTo($path2),
+             ease: 'inOutCirc',
+             duration: 500
+             // onComplete: animateRandomPoints <-- SUPPRIMER CETTE LIGNE pour arrêter la boucle ET activer action click souris
+         }); 
+         }
 
-        // Start the animation
-        animateRandomPoints();
+        //  Start the animationmais suppression ligne animateRandomPoints(); pour arrêter le démarrage auto
 
-        // A function to generate random points on #path-2 on each iteration
-        // For demo purpose only
+         // A function to generate random points on #path-2 on each iteration
+         
+         function generatePoints() {
+         const total = utils.random(4, 64);
+         const r1 = utils.random(4, 56);
+         const r2 = 56;
+         const isOdd = n => n % 2;
+         let points = '';
+         for (let i = 0, l = isOdd(total) ? total + 1 : total; i < l; i++) {
+             const r = isOdd(i) ? r1 : r2;
+             const a = (2 * Math.PI * i / l) - Math.PI / 2;
+             const x = 152 + utils.round(r * Math.cos(a), 0);
+             const y = 56 + utils.round(r * Math.sin(a), 0);
+             points += `${x},${y} `;
+         }
+         return points;
+         }
+         
+         //Code Mouvement
+         
+         const $zone = document.querySelector('#zone'); 
+         const $poly = document.querySelector('#poly');
+         
+         let bounds = $zone.getBoundingClientRect();
+         const refreshBounds = () => bounds = $zone.getBoundingClientRect();
+         
+         const polyanim = createAnimatable($poly,{
+         x: 500,
+         y: 500,
+         ease: 'out(3)',
+         });
+         
+                 
+         const onMouseMove = e => {
+             const { width, height, left, top } = bounds;
+             const hw = width / 2;
+             const hh = height / 2;           
+             const x = utils.clamp(e.clientX - left - hw, -hw, hw);
+             const y = utils.clamp(e.clientY - top - hh, -hh, hh);
+             polyanim.x(x);
+             polyanim.y(y);
+         }
+         
         
-        function generatePoints() {
-        const total = utils.random(4, 64);
-        const r1 = utils.random(4, 56);
-        const r2 = 56;
-        const isOdd = n => n % 2;
-        let points = '';
-        for (let i = 0, l = isOdd(total) ? total + 1 : total; i < l; i++) {
-            const r = isOdd(i) ? r1 : r2;
-            const a = (2 * Math.PI * i / l) - Math.PI / 2;
-            const x = 152 + utils.round(r * Math.cos(a), 0);
-            const y = 56 + utils.round(r * Math.sin(a), 0);
-            points += `${x},${y} `;
-        }
-        return points;
-        }
-        
-        //Code Mouvement
-        
-        const $zone = document.querySelector('#zone'); 
-        const $poly = document.querySelector('#poly');
-        
-        let bounds = $zone.getBoundingClientRect();
-        const refreshBounds = () => bounds = $zone.getBoundingClientRect();
-        
-        const polyanim = createAnimatable($poly,{
-        x: 500,
-        y: 500,
-        ease: 'out(3)',
-        });
-        
-               
-        const onMouseMove = e => {
-            const { width, height, left, top } = bounds;
-            const hw = width / 2;
-            const hh = height / 2;           
-            const x = utils.clamp(e.clientX - left - hw, -hw, hw);
-            const y = utils.clamp(e.clientY - top - hh, -hh, hh);
-            polyanim.x(x);
-            polyanim.y(y);
-        }
-       
-        
-       window.addEventListener('mousemove', onMouseMove);
-       $demos.addEventListener('scroll', refreshBounds);
-       
-
-             
+         window.addEventListener('mousemove', onMouseMove);
+         window.addEventListener('scroll', refreshBounds); // !   définir bonne fonction => windows 
+         window.addEventListener('resize', refreshBounds); // évite les bugs au redimensionnement
+         
+         // clic de zone pour animer les points slmt pdt click
+         $zone.addEventListener('click', animateRandomPoints);
+         
     </script>
 </body>
 </html>
