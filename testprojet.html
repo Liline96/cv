@@ -6,6 +6,9 @@
     <title>Project Anime.js of A. Rotin</title>
     <style>
         body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
             height: 100vh;
             margin: 0;
             background-color: #f4f4f9;
@@ -13,7 +16,7 @@
           svg {
             width: 80vw;
             height: 80vh;
-            border-radius: 2px;
+            border-radius: 8px;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
         }  
     </style>
@@ -52,8 +55,8 @@ const [ $path1, $path2 ] = utils.$('polygon');
         
         function generatePoints() {
         const total = utils.random(4, 64);
-        const r1 = utils.random(4, 30);
-        const r2 = 30;
+        const r1 = utils.random(4, 56);
+        const r2 = 56;
         const isOdd = n => n % 2;
         let points = '';
         for (let i = 0, l = isOdd(total) ? total + 1 : total; i < l; i++) {
