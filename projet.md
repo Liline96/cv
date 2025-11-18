@@ -18,9 +18,10 @@ En dehors de l'objectif d'avoir une animation fonctionnelle qui suit le curseur,
 - Gemini 2.5 Pro 
 
 ### Méthode de travail
-- Expérimentation sur JsBin pour visualiser des codes
+- Expérimentation sur JsBin pour visualiser la page et éditer le code
 - Débogage sur Visual Studio Code 
-- S'il y a un blocage utilisation demander à Gemini pour mieux comprendre le code, expliquer puis corriger si nécessaire.
+- S'il y a un blocage utilisation de Gemini pour mieux comprendre le code, expliquer et corriger.
+- retour à Expérimenter sur Jsbin
 https://gemini.google.com/share/c3b671215c15
 
 
