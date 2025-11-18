@@ -15,7 +15,10 @@ En dehors de l'objectif d'avoir une animation fonctionnelle qui suit le curseur,
 ### Outils 
 - Visual Studio Code
 - JsBin 
-- Gemini 2.5 Pro 
+- Gemini 2.5 Pro
+- Reddit
+- Youtube
+- Stack Overflow
 
 ### Méthode de travail
 - Expérimentation sur JsBin pour visualiser la page et éditer le code
