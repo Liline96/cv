@@ -30,10 +30,11 @@ https://gemini.google.com/share/c3b671215c15
 - Essaie sur Jsbin du deuxième code (https://animejs.com/documentation/animatable) en prenant la base du 1er code (à partir de import).
 - Tentative de création des 2 codes en 1
 - Demande à Gemini d'expliquer chaque étape du code avec le prompt "explique comment fonctionne chaque étape de ce code"
-- rédaction des const zone et poly manuellement 
+- rédaction du code sur les mouvements de la souris basé sur le code gemini mais modification des valeurs const zone et poly manuellement 
 - Modification du SVG manuellement
 - utilisation d'un math random pour générer 6 chiffre pour code HEX
-- random.color crée par Visual Studio Code
+- random.color crée par Visual Studio Code et modifié manuellement
+- Ajout d'un paramètre pour modfier la forme du polygone à chaque clic de souris
 
 ### Axe d'amélioration 
 - Ajouter des commentaires plus clairs qui explique bien le code
