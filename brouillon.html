@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Anime.js of A. Rotin</title>
+    <style>
+         body {
+            /* On restaure le centrage pour bien voir la zone */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f9;
+            overflow: hidden; /* Empêche tout défilement */
+        }
+         svg {
+            /* * LA SOLUTION EST ICI 
+             */
+            
+            /* 1. On définit une largeur maximale (ex: 90% de la largeur) */
+            width: 90vw; 
+            
+            /* 2. On DÉFINIT PAS la hauteur, on la remplace par le ratio */
+            /* height: 80vh; <-- SUPPRIMÉ */
+            
+            /* 3. On force le ratio à être identique à celui du viewBox */
+            aspect-ratio: 304 / 112;
+            
+            /* 4. On ajoute une sécurité pour les écrans très hauts */
+            max-height: 90vh;
+
+            /* Styles visuels */
+            border-radius: 8px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            cursor: crosshair;
+        }    
+    </style>
+</head>
+    
+<body>
+    <svg id="zone" viewBox="-152 -56 304 112">
+        <g id="poly" stroke-width="3" stroke="currentColor" stroke-linejoin="round" fill="none" fill-rule="evenodd">
+            <polygon id="path-1" points="0,-52 18,-18 52,0 18,18 0,52 -18,18 -52,0 -18,-18"></polygon>
+            <polygon style="opacity: 0" id="path-2" points="0,-52 18,-18 52,0 18,18 0,52 -18,18 -52,0 -18,-18"></polygon>
+        </g>
+    </svg>
+
+    <script type="module">
+import { animate, svg, utils, createAnimatable } from 'https://esm.sh/animejs';
+
+const [ $path1, $path2 ] = utils.$('polygon');
+
+        function animateRandomPoints() {
+         const randomColor = `hsl(${utils.random(0, 360)}, 70%, 50%)`;
+         $path1.style.stroke = randomColor;
+        
+         utils.set($path2, { points: generatePoints() });
+         
+         animate($path1, {
+             points: svg.morphTo($path2),
+             ease: 'inOutCirc',
+             duration: 500
+         }); 
+         }
+
+         function generatePoints() {
+         const total = utils.random(4, 64);
+         const r1 = utils.random(4, 56);
+         const r2 = 56;
+         const isOdd = n => n % 2;
+         let points = '';
+         for (let i = 0, l = isOdd(total) ? total + 1 : total; i < l; i++) {
+             const r = isOdd(i) ? r1 : r2;
+             const a = (2 * Math.PI * i / l) - Math.PI / 2;
+             
+             // Points centrés sur 0,0
+             const x = utils.round(r * Math.cos(a), 0);
+             const y = utils.round(r * Math.sin(a), 0);
+
+             points += `${x},${y} `;
+         }
+         return points;
+         }
+         
+         // --- Code Mouvement (INCHANGÉ) ---
+         
+         const $zone = document.querySelector('#zone'); 
+         const $poly = document.querySelector('#poly');
+         
+         let bounds = $zone.getBoundingClientRect();
+         const refreshBounds = () => bounds = $zone.getBoundingClientRect();
+         
+         const polyanim = createAnimatable($poly,{
+         x: 500,
+         y: 500,
+         ease: 'out(3)',
+         });
+         
+                 
+         const onMouseMove = e => {
+             const { width, height, left, top } = bounds;
+             const hw = width / 2;
+             const hh = height / 2;           
+             const x = utils.clamp(e.clientX - left - hw, -hw, hw);
+             const y = utils.clamp(e.clientY - top - hh, -hh, hh);
+             polyanim.x(x);
+             polyanim.y(y);
+         }
+         
+         // --- Écouteurs (INCHANGÉS) ---
+         window.addEventListener('mousemove', onMouseMove);
+         window.addEventListener('scroll', refreshBounds); 
+         window.addEventListener('resize', refreshBounds); 
+         
+         $zone.addEventListener('click', animateRandomPoints);
+         
+    </script>
+</body>
+</html>
