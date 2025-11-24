@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Anime.js of A. Rotin</title>
+    <title>Project Anime.js + Tone.js Adeline Rotin</title>
     <style>
         body {
             display: flex;
@@ -13,16 +13,15 @@
             margin: 0;
             background-color: #f4f4f9;
         }
-         svg {
+        svg {
             width: 80vw;
             height: 80vh;
             border-radius: 8px;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-            cursor: circle; /
+            cursor: pointer;
         }   
     </style>
 </head>
-    
 <body>
     <svg id="zone" viewBox="0 0 304 112">
         <g id="poly" stroke-width="3" stroke="currentColor" stroke-linejoin="round" fill="none" fill-rule="evenodd">
@@ -32,79 +31,116 @@
     </svg>
 
     <script type="module">
-import { animate, svg, utils, createAnimatable } from 'https://esm.sh/animejs';
+        import { animate, svg, utils, createAnimatable } from 'https://esm.sh/animejs';
+        import * as Tone from 'https://esm.sh/tone';
 
-const [ $path1, $path2 ] = utils.$('polygon');
+        const [ $path1, $path2 ] = utils.$('polygon');
 
-        function animateRandomPoints() {
-         // change color randomly
-         const randomColor = `hsl(${utils.random(0, 360)}, 70%, 50%)`;
-         $path1.style.stroke = randomColor;
+        // On garde le synthétiseur fmsine
+        const synth = new Tone.Synth({
+            oscillator: { type: "fmsine" },
+            envelope: {
+                attack: 0.05,
+                decay: 0.1,
+                sustain: 0.3,
+                release: 1 // Le release de base sera écrasé par notre durée calculée
+            }
+        }).toDestination();
+
+        async function animateRandomPoints() {
+            await Tone.start();
+
+            // --- 1. CALCUL DES VARIABLES MAÎTRESSES ---
+            
+            // TOTAL détermine la GRAVITÉ (Octave)
+            const total = utils.random(4, 64);
+            
+            // R1 détermine la DURÉE (AmplitudeEnvelope)
+            // r1 va de 4 (pointu) à 56 (rond)
+            const r1 = utils.random(4, 56);
+
+
+            // --- 2. CALCUL DU SON ---
+
+            // A. La Note (Octave inversement proportionnelle à Total)
+            const notes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+            const randomNoteChar = notes[utils.random(0, notes.length - 1)];
+            let octave = 7 - Math.floor(total / 10);
+            octave = utils.clamp(octave, 1, 7);
+            const fullNote = randomNoteChar + octave;
+
+            // B. La Durée (Proportionnelle à R1)
+            // Si r1 = 4, durée = 0.1s (très court)
+            // Si r1 = 56, durée = ~2.0s (très long)
+            // On divise par 25 pour obtenir des secondes utilisables
+            const duration = r1 / 25; 
+
+            // On joue la note avec la durée calculée
+            synth.triggerAttackRelease(fullNote, duration);
+
+
+            // --- 3. CALCUL DU VISUEL ---
+            
+            const randomColor = `hsl(${utils.random(0, 360)}, 70%, 50%)`;
+            $path1.style.stroke = randomColor;
         
-         // Update the points attribute on #path-2
-         utils.set($path2, { points: generatePoints() });
-         // Morph the points of #path-1 into #path-2
-         animate($path1, {
-             points: svg.morphTo($path2),
-             ease: 'inOutCirc',
-             duration: 500
-             // onComplete: animateRandomPoints <-- SUPPRIMER CETTE LIGNE pour arrêter la boucle ET activer action click souris
-         }); 
-         }
+            // IMPORTANT : On passe maintenant 'total' ET 'r1' à la fonction
+            utils.set($path2, { points: generatePoints(total, r1) });
+            
+            animate($path1, {
+                points: svg.morphTo($path2),
+                ease: 'inOutCirc',
+                duration: 500
+            }); 
+        }
 
-        //  Start the animationmais suppression ligne animateRandomPoints(); pour arrêter le démarrage auto
-
-         // A function to generate random points on #path-2 on each iteration
-         
-         function generatePoints() {
-         const total = utils.random(4, 64);
-         const r1 = utils.random(4, 56);
-         const r2 = 56;
-         const isOdd = n => n % 2;
-         let points = '';
-         for (let i = 0, l = isOdd(total) ? total + 1 : total; i < l; i++) {
-             const r = isOdd(i) ? r1 : r2;
-             const a = (2 * Math.PI * i / l) - Math.PI / 2;
-             const x = 152 + utils.round(r * Math.cos(a), 0);
-             const y = 56 + utils.round(r * Math.sin(a), 0);
-             points += `${x},${y} `;
-         }
-         return points;
-         }
-         
-         //Code Mouvement
-         
-         const $zone = document.querySelector('#zone'); 
-         const $poly = document.querySelector('#poly');
-         
-         let bounds = $zone.getBoundingClientRect();
-         const refreshBounds = () => bounds = $zone.getBoundingClientRect();
-         
-         const polyanim = createAnimatable($poly,{
-         x: 500,
-         y: 500,
-         ease: 'out(3)',
-         });
-         
-                 
-         const onMouseMove = e => {
-             const { width, height, left, top } = bounds;
-             const hw = width / 2;
-             const hh = height / 2;           
-             const x = utils.clamp(e.clientX - left - hw, -hw, hw);
-             const y = utils.clamp(e.clientY - top - hh, -hh, hh);
-             polyanim.x(x);
-             polyanim.y(y);
-         }
-         
+        // La fonction accepte maintenant deux paramètres externes
+        function generatePoints(total, r1) {
+            // const total = ... (supprimé car passé en paramètre)
+            // const r1 = ... (supprimé car passé en paramètre)
+            
+            const r2 = 56;
+            const isOdd = n => n % 2;
+            let points = '';
+            for (let i = 0, l = isOdd(total) ? total + 1 : total; i < l; i++) {
+                // Ici on utilise le r1 reçu depuis animateRandomPoints
+                const r = isOdd(i) ? r1 : r2;
+                const a = (2 * Math.PI * i / l) - Math.PI / 2;
+                const x = 152 + utils.round(r * Math.cos(a), 0);
+                const y = 56 + utils.round(r * Math.sin(a), 0);
+                points += `${x},${y} `;
+            }
+            return points;
+        }
         
-         window.addEventListener('mousemove', onMouseMove);
-         window.addEventListener('scroll', refreshBounds); // !   définir bonne fonction => windows 
-         window.addEventListener('resize', refreshBounds); // évite les bugs au redimensionnement
-         
-         // clic de zone pour animer les points slmt pdt click
-         $zone.addEventListener('click', animateRandomPoints);
-         
+        const $zone = document.querySelector('#zone'); 
+        const $poly = document.querySelector('#poly');
+        
+        let bounds = $zone.getBoundingClientRect();
+        const refreshBounds = () => bounds = $zone.getBoundingClientRect();
+        
+        const polyanim = createAnimatable($poly,{
+            x: 500,
+            y: 500,
+            ease: 'out(3)',
+        });
+                
+        const onMouseMove = e => {
+            const { width, height, left, top } = bounds;
+            const hw = width / 2;
+            const hh = height / 2;            
+            const x = utils.clamp(e.clientX - left - hw, -hw, hw);
+            const y = utils.clamp(e.clientY - top - hh, -hh, hh);
+            polyanim.x(x);
+            polyanim.y(y);
+        }
+        
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('scroll', refreshBounds); 
+        window.addEventListener('resize', refreshBounds); 
+        
+        $zone.addEventListener('click', animateRandomPoints);
+        
     </script>
 </body>
 </html>
