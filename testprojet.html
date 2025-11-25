@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Anime.js + Tone.js Centered</title>
+    <title>Project Anime.js + Tone.js Smooth Follow</title>
     <style>
         body {
             display: flex;
@@ -12,22 +12,22 @@
             height: 100vh;
             margin: 0;
             background-color: #f4f4f9;
+            overflow: hidden; /* Empêche les scrollbars parasites */
         }
         svg {
-            width: 100vw;
-            height: 100vh;
+            width: 80vw;
+            height: 80vh;
             border-radius: 8px;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-            
             cursor: pointer;
         }   
     </style>
 </head>
 <body>
-    <svg id="zone" viewBox="0 0 500 500">
+    <svg id="zone" viewBox="0 0 304 112">
         <g id="poly" stroke-width="3" stroke="currentColor" stroke-linejoin="round" fill="none" fill-rule="evenodd">
-            <polygon id="path-1" points=""></polygon>
-            <polygon style="opacity: 0" id="path-2" points=""></polygon>
+            <polygon id="path-1" points="152,4 170,38 204,56 170,74 152,108 134,74 100,56 134,38"></polygon>
+            <polygon style="opacity: 0" id="path-2" points="152,4 170,38 204,56 170,74 152,108 134,74 100,56 134,38"></polygon>
         </g>
     </svg>
 
@@ -35,85 +35,88 @@
         import { animate, svg, utils, createAnimatable } from 'https://esm.sh/animejs';
         import * as Tone from 'https://esm.sh/tone';
 
-        // --- 1. INITIALISATION DU CONTEXTE VISUEL ---
-        const $zone = document.querySelector('#zone'); 
-        
-        // On récupère le viewBox ("0 0 304 112") et on le transforme en tableau de nombres
-        const viewBoxAttr = $zone.getAttribute('viewBox').split(' ').map(Number);
-        const vbWidth = viewBoxAttr[2];  // 304
-        const vbHeight = viewBoxAttr[3]; // 112
-
-        // Calcul dynamique du centre
-        const centerX = vbWidth / 2;
-        const centerY = vbHeight / 2;
-
-        const [ $path1, $path2 ] = utils.$('polygon');
-
-        // --- 2. FONCTION DE GÉNÉRATION DE POINTS ---
-        
-        // Cette fonction utilise maintenant centerX et centerY calculés plus haut
-        function generatePoints(total, r1) {
-            const r2 = 56; // Rayon externe (peut aussi être dynamique si tu veux)
-            const isOdd = n => n % 2;
-            let points = '';
-            
-            for (let i = 0, l = isOdd(total) ? total + 1 : total; i < l; i++) {
-                const r = isOdd(i) ? r1 : r2;
-                const a = (2 * Math.PI * i / l) - Math.PI / 2;
-                
-                // Formule : Centre + (Rayon * Cosinus(angle))
-                const x = centerX + utils.round(r * Math.cos(a), 0);
-                const y = centerY + utils.round(r * Math.sin(a), 0);
-                
-                points += `${x},${y} `;
-            }
-            return points;
-        }
-
-        // --- 3. DESSIN INITIAL ---
-        // On dessine la forme de départ immédiatement pour ne pas avoir un SVG vide
-        // On simule des valeurs par défaut (ex: total=6, r1=20)
-        $path1.setAttribute('points', generatePoints(6, 20));
-
-
-        // --- 4. CONFIGURATION AUDIO (Tone.js) ---
+        // --- 1. CONFIGURATION AUDIO (Tone.js) ---
         const synth = new Tone.Synth({
             oscillator: { type: "fmsine" },
             envelope: {
                 attack: 0.05,
                 decay: 0.1,
                 sustain: 0.3,
-                release: 1
+                release: 1 
             }
         }).toDestination();
 
+        // --- 2. CONFIGURATION VISUELLE (Anime.js) ---
+        const [ $path1, $path2 ] = utils.$('polygon');
+        const $zone = document.querySelector('#zone'); 
+        const $poly = document.querySelector('#poly');
 
-        // --- 5. ANIMATION PRINCIPALE ---
+        // --- 3. LOGIQUE DE MOUVEMENT (Basée sur ton exemple) ---
+        
+        // Calcul des limites de la zone
+        let bounds = $zone.getBoundingClientRect();
+        const refreshBounds = () => bounds = $zone.getBoundingClientRect();
+
+        // Création de l'objet animable avec inertie (500ms de délai)
+        const polyanim = createAnimatable($poly, {
+            x: 500, // Durée pour atteindre X
+            y: 500, // Durée pour atteindre Y
+            ease: 'out(3)', // Douceur de l'arrêt
+        });
+
+        const onMouseMove = e => {
+            const { width, height, left, top } = bounds;
+            const hw = width / 2;
+            const hh = height / 2;
+            
+            // Calcul de la position théorique (clampée pour rester dans la zone)
+            const targetX = utils.clamp(e.clientX - left - hw, -hw, hw);
+            const targetY = utils.clamp(e.clientY - top - hh, -hh, hh);
+
+            // LOGIQUE DU CENTRE (Aimant)
+            // On vérifie la distance avec le centre (0,0)
+            const distance = Math.hypot(targetX, targetY);
+            
+            if (distance < 20) { 
+                // Si on est à moins de 20px du centre, on force 0,0
+                polyanim.x(0);
+                polyanim.y(0);
+            } else {
+                // Sinon on va vers la souris (avec les 500ms de délai définis plus haut)
+                polyanim.x(targetX);
+                polyanim.y(targetY);
+            }
+        }
+
+        // Écouteurs d'événements pour le mouvement
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('scroll', refreshBounds); 
+        window.addEventListener('resize', refreshBounds); 
+
+
+        // --- 4. LOGIQUE D'ANIMATION (Morphing + Son) ---
+        
         async function animateRandomPoints() {
             await Tone.start();
 
-            // Variables Aléatoires
-            const total = utils.random(4, 64);
-            const r1 = utils.random(4, 56);
+            // Variables aléatoires
+            const total = utils.random(4, 64); 
+            const r1 = utils.random(4, 56);    
 
-            // Audio Logic
+            // Son
             const notes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
             const randomNoteChar = notes[utils.random(0, notes.length - 1)];
             let octave = 7 - Math.floor(total / 10);
             octave = utils.clamp(octave, 1, 7);
-            const fullNote = randomNoteChar + octave;
-            const duration = r1 / 25; 
+            const duration = (60 - r1) / 20; 
+            
+            synth.triggerAttackRelease(randomNoteChar + octave, duration);
 
-            synth.triggerAttackRelease(fullNote, duration);
-
-            // Visuel Logic
+            // Visuel (Morphing)
             const randomColor = `hsl(${utils.random(0, 360)}, 70%, 50%)`;
             $path1.style.stroke = randomColor;
-        
-            // On génère la nouvelle forme cible dans path-2
             utils.set($path2, { points: generatePoints(total, r1) });
             
-            // On morphe path-1 vers path-2
             animate($path1, {
                 points: svg.morphTo($path2),
                 ease: 'inOutCirc',
@@ -121,36 +124,22 @@
             }); 
         }
 
-        
-        // --- 6. GESTION DU MOUVEMENT (Souris) ---
-        const $poly = document.querySelector('#poly');
-        let bounds = $zone.getBoundingClientRect();
-        
-        const refreshBounds = () => bounds = $zone.getBoundingClientRect();
-        
-        const polyanim = createAnimatable($poly,{
-            x: 500, // Position de départ arbitraire pour anime.js
-            y: 500,
-            ease: 'out(3)',
-        });
-                
-        const onMouseMove = e => {
-            const { width, height, left, top } = bounds;
-            const hw = width / 2;
-            const hh = height / 2;            
-            
-            // Calcul de la position de la souris par rapport au centre de l'élément
-            const x = utils.clamp(e.clientX - left - hw, -hw, hw);
-            const y = utils.clamp(e.clientY - top - hh, -hh, hh);
-            
-            polyanim.x(x);
-            polyanim.y(y);
+        // Générateur de points
+        function generatePoints(total, r1) {
+            const r2 = 56;
+            const isOdd = n => n % 2;
+            let points = '';
+            for (let i = 0, l = isOdd(total) ? total + 1 : total; i < l; i++) {
+                const r = isOdd(i) ? r1 : r2;
+                const a = (2 * Math.PI * i / l) - Math.PI / 2;
+                const x = 152 + utils.round(r * Math.cos(a), 0);
+                const y = 56 + utils.round(r * Math.sin(a), 0);
+                points += `${x},${y} `;
+            }
+            return points;
         }
         
-        window.addEventListener('mousemove', onMouseMove);
-        window.addEventListener('scroll', refreshBounds); 
-        window.addEventListener('resize', refreshBounds); 
-        
+        // Déclencheur au clic
         $zone.addEventListener('click', animateRandomPoints);
         
     </script>
