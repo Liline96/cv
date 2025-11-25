@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Anime.js + Tone.js (No Magnet)</title>
+    <title>Project Anime.js + Tone.js Adeline Rotin</title>
     <style>
         body {
             display: flex;
@@ -12,7 +12,6 @@
             height: 100vh;
             margin: 0;
             background-color: #f4f4f9;
-            overflow: hidden; 
         }
         svg {
             width: 80vw;
@@ -35,72 +34,57 @@
         import { animate, svg, utils, createAnimatable } from 'https://esm.sh/animejs';
         import * as Tone from 'https://esm.sh/tone';
 
-        // --- 1. AUDIO ---
+        const [ $path1, $path2 ] = utils.$('polygon');
+
+        // On garde le synthétiseur fmsine
         const synth = new Tone.Synth({
             oscillator: { type: "fmsine" },
             envelope: {
                 attack: 0.05,
                 decay: 0.1,
                 sustain: 0.3,
-                release: 1 
+                release: 1 // Le release de base sera écrasé par notre durée calculée
             }
         }).toDestination();
 
-        // --- 2. VISUEL & MOUVEMENT ---
-        const [ $path1, $path2 ] = utils.$('polygon');
-        const $zone = document.querySelector('#zone'); 
-        const $poly = document.querySelector('#poly');
-
-        let bounds = $zone.getBoundingClientRect();
-        const refreshBounds = () => bounds = $zone.getBoundingClientRect();
-
-        // Configuration de l'inertie (500ms de délai)
-        const polyanim = createAnimatable($poly, {
-            x: 500, 
-            y: 500, 
-            ease: 'out(3)', 
-        });
-
-        const onMouseMove = e => {
-            const { width, height, left, top } = bounds;
-            const hw = width / 2;
-            const hh = height / 2;
-            
-            // On calcule simplement la position cible
-            const targetX = utils.clamp(e.clientX - left - hw, -hw, hw);
-            const targetY = utils.clamp(e.clientY - top - hh, -hh, hh);
-
-            // On applique le mouvement directement (l'inertie est gérée par createAnimatable)
-            polyanim.x(targetX);
-            polyanim.y(targetY);
-        }
-
-        window.addEventListener('mousemove', onMouseMove);
-        window.addEventListener('scroll', refreshBounds); 
-        window.addEventListener('resize', refreshBounds); 
-
-
-        // --- 3. ANIMATION ET SON AU CLIC ---
-        
         async function animateRandomPoints() {
             await Tone.start();
 
-            // Variables aléatoires
-            const total = utils.random(4, 64); 
-            const r1 = utils.random(4, 56);    
+            // --- 1. CALCUL DES VARIABLES MAÎTRESSES ---
+            
+            // TOTAL détermine la GRAVITÉ (Octave)
+            const total = utils.random(4, 64);
+            
+            // R1 détermine la DURÉE (AmplitudeEnvelope)
+            // r1 va de 4 (pointu) à 56 (rond)
+            const r1 = utils.random(4, 56);
 
-            // Son (Logique Octave/Total et Durée/R1 inversée)
+
+            // --- 2. CALCUL DU SON ---
+
+            // A. La Note (Octave inversement proportionnelle à Total)
             const notes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
             const randomNoteChar = notes[utils.random(0, notes.length - 1)];
             let octave = 7 - Math.floor(total / 10);
             octave = utils.clamp(octave, 1, 7);
-            const duration = (60 - r1) / 20; 
-            
-            synth.triggerAttackRelease(randomNoteChar + octave, duration);
+            const fullNote = randomNoteChar + octave;
 
-            // Visuel (Morphing)
+            // B. La Durée (Proportionnelle à R1)
+            // Si r1 = 4, durée = 0.1s (très court)
+            // Si r1 = 56, durée = ~2.0s (très long)
+            // On divise par 25 pour obtenir des secondes utilisables
+            const duration = r1 / 25; 
+
+            // On joue la note avec la durée calculée
+            synth.triggerAttackRelease(fullNote, duration);
+
+
+            // --- 3. CALCUL DU VISUEL ---
+            
             const randomColor = `hsl(${utils.random(0, 360)}, 70%, 50%)`;
             $path1.style.stroke = randomColor;
+        
+            // IMPORTANT : On passe maintenant 'total' ET 'r1' à la fonction
             utils.set($path2, { points: generatePoints(total, r1) });
             
             animate($path1, {
@@ -110,11 +94,16 @@
             }); 
         }
 
+        // La fonction accepte maintenant deux paramètres externes
         function generatePoints(total, r1) {
+            // const total = ... (supprimé car passé en paramètre)
+            // const r1 = ... (supprimé car passé en paramètre)
+            
             const r2 = 56;
             const isOdd = n => n % 2;
             let points = '';
             for (let i = 0, l = isOdd(total) ? total + 1 : total; i < l; i++) {
+                // Ici on utilise le r1 reçu depuis animateRandomPoints
                 const r = isOdd(i) ? r1 : r2;
                 const a = (2 * Math.PI * i / l) - Math.PI / 2;
                 const x = 152 + utils.round(r * Math.cos(a), 0);
@@ -123,6 +112,32 @@
             }
             return points;
         }
+        
+        const $zone = document.querySelector('#zone'); 
+        const $poly = document.querySelector('#poly');
+        
+        let bounds = $zone.getBoundingClientRect();
+        const refreshBounds = () => bounds = $zone.getBoundingClientRect();
+        
+        const polyanim = createAnimatable($poly,{
+            x: 500,
+            y: 500,
+            ease: 'out(3)',
+        });
+                
+        const onMouseMove = e => {
+            const { width, height, left, top } = bounds;
+            const hw = width / 2;
+            const hh = height / 2;            
+            const x = utils.clamp(e.clientX - left - hw, -hw, hw);
+            const y = utils.clamp(e.clientY - top - hh, -hh, hh);
+            polyanim.x(x);
+            polyanim.y(y);
+        }
+        
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('scroll', refreshBounds); 
+        window.addEventListener('resize', refreshBounds); 
         
         $zone.addEventListener('click', animateRandomPoints);
         
