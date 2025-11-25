@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Anime.js + Tone.js Smooth Follow</title>
+    <title>Project Anime.js + Tone.js (No Magnet)</title>
     <style>
         body {
             display: flex;
@@ -12,7 +12,7 @@
             height: 100vh;
             margin: 0;
             background-color: #f4f4f9;
-            overflow: hidden; /* Empêche les scrollbars parasites */
+            overflow: hidden; 
         }
         svg {
             width: 80vw;
@@ -35,7 +35,7 @@
         import { animate, svg, utils, createAnimatable } from 'https://esm.sh/animejs';
         import * as Tone from 'https://esm.sh/tone';
 
-        // --- 1. CONFIGURATION AUDIO (Tone.js) ---
+        // --- 1. AUDIO ---
         const synth = new Tone.Synth({
             oscillator: { type: "fmsine" },
             envelope: {
@@ -46,22 +46,19 @@
             }
         }).toDestination();
 
-        // --- 2. CONFIGURATION VISUELLE (Anime.js) ---
+        // --- 2. VISUEL & MOUVEMENT ---
         const [ $path1, $path2 ] = utils.$('polygon');
         const $zone = document.querySelector('#zone'); 
         const $poly = document.querySelector('#poly');
 
-        // --- 3. LOGIQUE DE MOUVEMENT (Basée sur ton exemple) ---
-        
-        // Calcul des limites de la zone
         let bounds = $zone.getBoundingClientRect();
         const refreshBounds = () => bounds = $zone.getBoundingClientRect();
 
-        // Création de l'objet animable avec inertie (500ms de délai)
+        // Configuration de l'inertie (500ms de délai)
         const polyanim = createAnimatable($poly, {
-            x: 500, // Durée pour atteindre X
-            y: 500, // Durée pour atteindre Y
-            ease: 'out(3)', // Douceur de l'arrêt
+            x: 500, 
+            y: 500, 
+            ease: 'out(3)', 
         });
 
         const onMouseMove = e => {
@@ -69,32 +66,21 @@
             const hw = width / 2;
             const hh = height / 2;
             
-            // Calcul de la position théorique (clampée pour rester dans la zone)
+            // On calcule simplement la position cible
             const targetX = utils.clamp(e.clientX - left - hw, -hw, hw);
             const targetY = utils.clamp(e.clientY - top - hh, -hh, hh);
 
-            // LOGIQUE DU CENTRE (Aimant)
-            // On vérifie la distance avec le centre (0,0)
-            const distance = Math.hypot(targetX, targetY);
-            
-            if (distance < 20) { 
-                // Si on est à moins de 20px du centre, on force 0,0
-                polyanim.x(0);
-                polyanim.y(0);
-            } else {
-                // Sinon on va vers la souris (avec les 500ms de délai définis plus haut)
-                polyanim.x(targetX);
-                polyanim.y(targetY);
-            }
+            // On applique le mouvement directement (l'inertie est gérée par createAnimatable)
+            polyanim.x(targetX);
+            polyanim.y(targetY);
         }
 
-        // Écouteurs d'événements pour le mouvement
         window.addEventListener('mousemove', onMouseMove);
         window.addEventListener('scroll', refreshBounds); 
         window.addEventListener('resize', refreshBounds); 
 
 
-        // --- 4. LOGIQUE D'ANIMATION (Morphing + Son) ---
+        // --- 3. ANIMATION ET SON AU CLIC ---
         
         async function animateRandomPoints() {
             await Tone.start();
@@ -103,7 +89,7 @@
             const total = utils.random(4, 64); 
             const r1 = utils.random(4, 56);    
 
-            // Son
+            // Son (Logique Octave/Total et Durée/R1 inversée)
             const notes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
             const randomNoteChar = notes[utils.random(0, notes.length - 1)];
             let octave = 7 - Math.floor(total / 10);
@@ -124,7 +110,6 @@
             }); 
         }
 
-        // Générateur de points
         function generatePoints(total, r1) {
             const r2 = 56;
             const isOdd = n => n % 2;
@@ -139,7 +124,6 @@
             return points;
         }
         
-        // Déclencheur au clic
         $zone.addEventListener('click', animateRandomPoints);
         
     </script>
