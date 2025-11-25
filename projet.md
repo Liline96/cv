@@ -11,7 +11,7 @@ En dehors de l'objectif d'avoir une animation fonctionnelle qui suit le curseur,
 - Changer de couleurs périodiquement 
 - changer de forme après un click de souris 
 
-## Conception 18/11  
+## Conception 18/11 
 ### Outils 
 - Visual Studio Code
 - JsBin 
@@ -23,7 +23,7 @@ En dehors de l'objectif d'avoir une animation fonctionnelle qui suit le curseur,
 ### Méthode de travail
 - Expérimentation sur JsBin pour visualiser la page et éditer le code
 - Débogage sur Visual Studio Code 
-- S'il y a un blocage utilisation de Gemini pour mieux comprendre le code, expliquer et corriger.
+- S'il y a un blocage d'utilisation de Gemini pour mieux comprendre le code, expliquer et corriger.
 - retour à Expérimenter sur Jsbin
 https://gemini.google.com/share/c3b671215c15
 
@@ -31,7 +31,7 @@ https://gemini.google.com/share/c3b671215c15
 ### Réalisation 
 - Lecture de la bibliographie de animejs
 - Explication du fonctionnement de chaque code
-- Essaie sur Jsbin du deuxième code (https://animejs.com/documentation/animatable) en prenant la base du 1er code (à partir de import).
+- Essaie sur Jsbin du deuxième code (https://animejs.com/documentation/animatable) en prenant la base du 1er code (à partir d'import).
 - Tentative de création des 2 codes en 1
 - Demande à Gemini d'expliquer chaque étape du code avec le prompt "explique comment fonctionne chaque étape de ce code"
 - rédaction du code sur les mouvements de la souris basé sur le code gemini mais modification des valeurs const zone et poly manuellement 
@@ -42,8 +42,25 @@ https://gemini.google.com/share/c3b671215c15
 
 ### Axe d'amélioration 
 - Ajouter des commentaires plus clairs qui explique bien le code
-- Modifier le SVG pour qu'il prenne soit toute la page, soit qu'il soit dans un rectangle avec une animation du polygone moins grand (résolution du conflit entre les pixels du polygone et les pixels du SVG soit création d'un id pour le SVG et formatage CSS dans <style> avec taille fixe en px ou vh/vw ).
+- Modifier le SVG pour qu'il prenne soit toute la page, soit qu'il soit dans un rectangle avec une animation du polygone moins grand (résolution du conflit entre les pixels du polygone et les pixels du SVG soit création d'un id pour le SVG et formatage CSS dans <style> avec taille fixe en px ou vh/vw).
 - Créer un <background> qui change de couleur en fonction de la taille de la fenêtre dans <style> avec valeur px min et max
+
+
+##Conception 25/11
+### Objectifs
+Ajouter des sons avec Tone.js   
+
+### Outils 
+- JsBin 
+- Gemini 3 Pro
+- Reddit
+- Youtube Getting Started with Tone.js | Web Audio Tutorial  https://www.youtube.com/watch?v=ftGuDvm5zDQ
+
+### Réalisation 
+- Lecture de la bibliographie (https://tonejs.github.io)(https://tonejs.github.io/docs/15.1.22/classes/Synth.html)
+- Vidéo youtube pour comprendre le fonctionnement de tone.js Getting Started with Tone.js | Web Audio Tutorial - Pt.1 à 4
+- Prompt Gemini écrit en fonction des connaissances acquises (https://g.co/gemini/share/0e82fe070a8d)
+- Essais sur JS.bin et sur le lien https://liline96.github.io/cv/testprojet2.html
 
 
 
