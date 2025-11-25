@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Anime.js + Tone.js Adeline Rotin</title>
+    <title>Project Anime.js + Tone.js Centered</title>
     <style>
         body {
             display: flex;
@@ -14,19 +14,20 @@
             background-color: #f4f4f9;
         }
         svg {
-            width: 80vw;
-            height: 80vh;
+            width: 100vw;
+            height: 100vh;
             border-radius: 8px;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            
             cursor: pointer;
         }   
     </style>
 </head>
 <body>
-    <svg id="zone" viewBox="0 0 304 112">
+    <svg id="zone" viewBox="0 0 500 500">
         <g id="poly" stroke-width="3" stroke="currentColor" stroke-linejoin="round" fill="none" fill-rule="evenodd">
-            <polygon id="path-1" points="152,4 170,38 204,56 170,74 152,108 134,74 100,56 134,38"></polygon>
-            <polygon style="opacity: 0" id="path-2" points="152,4 170,38 204,56 170,74 152,108 134,74 100,56 134,38"></polygon>
+            <polygon id="path-1" points=""></polygon>
+            <polygon style="opacity: 0" id="path-2" points=""></polygon>
         </g>
     </svg>
 
@@ -34,59 +35,85 @@
         import { animate, svg, utils, createAnimatable } from 'https://esm.sh/animejs';
         import * as Tone from 'https://esm.sh/tone';
 
+        // --- 1. INITIALISATION DU CONTEXTE VISUEL ---
+        const $zone = document.querySelector('#zone'); 
+        
+        // On récupère le viewBox ("0 0 304 112") et on le transforme en tableau de nombres
+        const viewBoxAttr = $zone.getAttribute('viewBox').split(' ').map(Number);
+        const vbWidth = viewBoxAttr[2];  // 304
+        const vbHeight = viewBoxAttr[3]; // 112
+
+        // Calcul dynamique du centre
+        const centerX = vbWidth / 2;
+        const centerY = vbHeight / 2;
+
         const [ $path1, $path2 ] = utils.$('polygon');
 
-        // On garde le synthétiseur fmsine
+        // --- 2. FONCTION DE GÉNÉRATION DE POINTS ---
+        
+        // Cette fonction utilise maintenant centerX et centerY calculés plus haut
+        function generatePoints(total, r1) {
+            const r2 = 56; // Rayon externe (peut aussi être dynamique si tu veux)
+            const isOdd = n => n % 2;
+            let points = '';
+            
+            for (let i = 0, l = isOdd(total) ? total + 1 : total; i < l; i++) {
+                const r = isOdd(i) ? r1 : r2;
+                const a = (2 * Math.PI * i / l) - Math.PI / 2;
+                
+                // Formule : Centre + (Rayon * Cosinus(angle))
+                const x = centerX + utils.round(r * Math.cos(a), 0);
+                const y = centerY + utils.round(r * Math.sin(a), 0);
+                
+                points += `${x},${y} `;
+            }
+            return points;
+        }
+
+        // --- 3. DESSIN INITIAL ---
+        // On dessine la forme de départ immédiatement pour ne pas avoir un SVG vide
+        // On simule des valeurs par défaut (ex: total=6, r1=20)
+        $path1.setAttribute('points', generatePoints(6, 20));
+
+
+        // --- 4. CONFIGURATION AUDIO (Tone.js) ---
         const synth = new Tone.Synth({
             oscillator: { type: "fmsine" },
             envelope: {
                 attack: 0.05,
                 decay: 0.1,
                 sustain: 0.3,
-                release: 1 // Le release de base sera écrasé par notre durée calculée
+                release: 1
             }
         }).toDestination();
 
+
+        // --- 5. ANIMATION PRINCIPALE ---
         async function animateRandomPoints() {
             await Tone.start();
 
-            // --- 1. CALCUL DES VARIABLES MAÎTRESSES ---
-            
-            // TOTAL détermine la GRAVITÉ (Octave)
+            // Variables Aléatoires
             const total = utils.random(4, 64);
-            
-            // R1 détermine la DURÉE (AmplitudeEnvelope)
-            // r1 va de 4 (pointu) à 56 (rond)
             const r1 = utils.random(4, 56);
 
-
-            // --- 2. CALCUL DU SON ---
-
-            // A. La Note (Octave inversement proportionnelle à Total)
+            // Audio Logic
             const notes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
             const randomNoteChar = notes[utils.random(0, notes.length - 1)];
             let octave = 7 - Math.floor(total / 10);
             octave = utils.clamp(octave, 1, 7);
             const fullNote = randomNoteChar + octave;
-
-            // B. La Durée (Proportionnelle à R1)
-            // Si r1 = 4, durée = 0.1s (très court)
-            // Si r1 = 56, durée = ~2.0s (très long)
-            // On divise par 25 pour obtenir des secondes utilisables
             const duration = r1 / 25; 
 
-            // On joue la note avec la durée calculée
             synth.triggerAttackRelease(fullNote, duration);
 
-
-            // --- 3. CALCUL DU VISUEL ---
-            
+            // Visuel Logic
             const randomColor = `hsl(${utils.random(0, 360)}, 70%, 50%)`;
             $path1.style.stroke = randomColor;
         
-            // IMPORTANT : On passe maintenant 'total' ET 'r1' à la fonction
+            // On génère la nouvelle forme cible dans path-2
             utils.set($path2, { points: generatePoints(total, r1) });
             
+            // On morphe path-1 vers path-2
             animate($path1, {
                 points: svg.morphTo($path2),
                 ease: 'inOutCirc',
@@ -94,33 +121,15 @@
             }); 
         }
 
-        // La fonction accepte maintenant deux paramètres externes
-        function generatePoints(total, r1) {
-            // const total = ... (supprimé car passé en paramètre)
-            // const r1 = ... (supprimé car passé en paramètre)
-            
-            const r2 = 56;
-            const isOdd = n => n % 2;
-            let points = '';
-            for (let i = 0, l = isOdd(total) ? total + 1 : total; i < l; i++) {
-                // Ici on utilise le r1 reçu depuis animateRandomPoints
-                const r = isOdd(i) ? r1 : r2;
-                const a = (2 * Math.PI * i / l) - Math.PI / 2;
-                const x = 152 + utils.round(r * Math.cos(a), 0);
-                const y = 56 + utils.round(r * Math.sin(a), 0);
-                points += `${x},${y} `;
-            }
-            return points;
-        }
         
-        const $zone = document.querySelector('#zone'); 
+        // --- 6. GESTION DU MOUVEMENT (Souris) ---
         const $poly = document.querySelector('#poly');
-        
         let bounds = $zone.getBoundingClientRect();
+        
         const refreshBounds = () => bounds = $zone.getBoundingClientRect();
         
         const polyanim = createAnimatable($poly,{
-            x: 500,
+            x: 500, // Position de départ arbitraire pour anime.js
             y: 500,
             ease: 'out(3)',
         });
@@ -129,8 +138,11 @@
             const { width, height, left, top } = bounds;
             const hw = width / 2;
             const hh = height / 2;            
+            
+            // Calcul de la position de la souris par rapport au centre de l'élément
             const x = utils.clamp(e.clientX - left - hw, -hw, hw);
             const y = utils.clamp(e.clientY - top - hh, -hh, hh);
+            
             polyanim.x(x);
             polyanim.y(y);
         }
