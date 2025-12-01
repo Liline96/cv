@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Anime.js + Tone.js Adeline Rotin 01.12 couleurs inverse</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            /* COULEUR DE FOND DE PAGE PAR DÉFAUT (GRAND ÉCRAN) : SOMBRE */
+            background-color: #1a1a1a; 
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.5s ease;
+        }
+
+        .instruction {
+            position: absolute;
+            top: 30px;
+            font-size: 15px;
+            /* TEXTE PAR DÉFAUT (GRAND ÉCRAN) : CLAIR */
+            color: #F0F0F0; 
+            transition: color 0.5s ease;
+            pointer-events: none;
+            text-align: center;
+            width: 100%;
+        }
+
+        svg {
+            width: 80vw;
+            height: 80vh;
+            border-radius: 8px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            /* FOND SVG PAR DÉFAUT (GRAND ÉCRAN) : NOIR */
+            background-color: #000000; 
+            transition: background-color 0.5s ease;
+        }   
+
+        /* --- MODE PETIT ÉCRAN (≤ 1200px) --- */
+        @media (max-width: 1200px) {
+            
+            /* Le texte devient NOIR */
+            .instruction {
+                color: #000000;
+            }
+
+            /* Le SVG devient CLAIR */
+            svg {
+                background-color: #F0F0F0;
+            }
+
+            /* Le fond de page devient CLAIR */
+            body {
+                background-color: #f4f4f9;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="instruction">cliquez sur le bouton droit de la souris</div>
+
+    <svg id="zone" viewBox="0 0 304 112">
+        <g id="poly" stroke-width="3" stroke="currentColor" stroke-linejoin="round" fill="none" fill-rule="evenodd">
+            <polygon id="path-1" points="152,4 170,38 204,56 170,74 152,108 134,74 100,56 134,38"></polygon>
+            <polygon style="opacity: 0" id="path-2" points="152,4 170,38 204,56 170,74 152,108 134,74 100,56 134,38"></polygon>
+        </g>
+    </svg>
+
+    <script type="module">
+        import { animate, svg, utils, createAnimatable } from 'https://esm.sh/animejs';
+        import * as Tone from 'https://esm.sh/tone';
+
+        const [ $path1, $path2 ] = utils.$('polygon');
+
+        const synth = new Tone.Synth({
+            oscillator: { type: "fmsine" },
+            envelope: {
+                attack: 0.05,
+                decay: 0.1,
+                sustain: 0.3,
+                release: 1 
+            }
+        }).toDestination();
+
+        async function animateRandomPoints() {
+            await Tone.start();
+
+            const total = utils.random(4, 64);
+            const r1 = utils.random(4, 56);
+
+            const notes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+            const randomNoteChar = notes[utils.random(0, notes.length - 1)];
+            let octave = 7 - Math.floor(total / 10);
+            octave = utils.clamp(octave, 1, 7);
+            const fullNote = randomNoteChar + octave;
+
+            const duration = r1 / 25; 
+
+            synth.triggerAttackRelease(fullNote, duration);
+
+            const randomColor = `hsl(${utils.random(0, 360)}, 70%, 50%)`;
+            $path1.style.stroke = randomColor;
+        
+            utils.set($path2, { points: generatePoints(total, r1) });
+            
+            animate($path1, {
+                points: svg.morphTo($path2),
+                ease: 'inOutCirc',
+                duration: 500
+            }); 
+        }
+
+        function generatePoints(total, r1) {
+            const r2 = 56;
+            const isOdd = n => n % 2;
+            let points = '';
+            for (let i = 0, l = isOdd(total) ? total + 1 : total; i < l; i++) {
+                const r = isOdd(i) ? r1 : r2;
+                const a = (2 * Math.PI * i / l) - Math.PI / 2;
+                const x = 152 + utils.round(r * Math.cos(a), 0);
+                const y = 56 + utils.round(r * Math.sin(a), 0);
+                points += `${x},${y} `;
+            }
+            return points;
+        }
+        
+        const $zone = document.querySelector('#zone'); 
+        const $poly = document.querySelector('#poly');
+        
+        let bounds = $zone.getBoundingClientRect();
+        const refreshBounds = () => bounds = $zone.getBoundingClientRect();
+        
+        const polyanim = createAnimatable($poly,{
+            x: 500,
+            y: 500,
+            ease: 'out(3)',
+        });
+                
+        const onMouseMove = e => {
+            const { width, height, left, top } = bounds;
+            const hw = width / 2;
+            const hh = height / 2;            
+            const x = utils.clamp(e.clientX - left - hw, -hw, hw);
+            const y = utils.clamp(e.clientY - top - hh, -hh, hh);
+            polyanim.x(x);
+            polyanim.y(y);
+        }
+        
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('scroll', refreshBounds); 
+        window.addEventListener('resize', refreshBounds); 
+        
+        $zone.addEventListener('click', animateRandomPoints);
+        
+    </script>
+</body>
+</html>
