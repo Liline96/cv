@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Anime.js + Tone.js correction</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #111; 
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden; 
+            font-family: 'Inter', sans-serif;
+            position: relative;
+        }
+
+        .instruction {
+            position: absolute;
+            top: 30px;
+            width: 100%;
+            font-size: 15px;
+            color: #888;
+            text-align: center;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        #zone {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #FFFFFF;
+            cursor: pointer;
+            z-index: 1;
+            overflow: visible; 
+        }
+
+        #center-group {
+            transform: translate(50vw, 50vh);
+        }
+
+        #poly {
+            stroke: #333;
+            stroke-width: 2px;
+            fill: none;
+            stroke-linejoin: round;
+        }
+
+        @media (max-width: 700px) {
+            #zone { background-color: #000; }
+            #poly { stroke: #FFF; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="instruction">Cliquez pour générer une forme et un son lié</div>
+
+    <svg id="zone">
+        <g id="center-group">
+            <g id="poly-container">
+                <g id="poly">
+                     <polygon id="path-1" points="0,-52 18,-18 52,0 18,18 0,52 -18,18 -52,0 -18,-18"></polygon>
+                    <polygon style="opacity: 0" id="path-2" points="0,-52 18,-18 52,0 18,18 0,52 -18,18 -52,0 -18,-18"></polygon>
+                </g>
+            </g>
+        </g>
+    </svg>
+
+    <script type="module">
+        import { animate, svg, utils, createAnimatable } from 'https://esm.sh/animejs';
+        import * as Tone from 'https://esm.sh/tone';
+
+        const [ $path1, $path2 ] = utils.$('polygon');
+        const $zone = document.querySelector('#zone'); 
+        const $polyContainer = document.querySelector('#poly-container');
+
+        const synth = new Tone.Synth({
+            oscillator: { type: "fmsine" },
+            envelope: { attack: 0.05, decay: 0.1, sustain: 0.3, release: 1 }
+        }).toDestination();
+
+        function generatePoints(total, r1) {
+            const r2 = 56; 
+            const isOdd = n => n % 2;
+            let points = '';
+            for (let i = 0, l = isOdd(total) ? total + 1 : total; i < l; i++) {
+                const r = isOdd(i) ? r1 : r2;
+                const a = (2 * Math.PI * i / l) - Math.PI / 2;
+                const x = utils.round(r * Math.cos(a), 0);
+                const y = utils.round(r * Math.sin(a), 0);
+                points += `${x},${y} `;
+            }
+            return points;
+        }
+
+        async function animateRandomPoints() {
+            await Tone.start();
+
+            // --- DEBUT DE LA MODIFICATION ---
+            const total = utils.random(4, 64);
+            const r1 = utils.random(4, 56);
+
+            const notes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+            const randomNoteChar = notes[utils.random(0, notes.length - 1)];
+            
+            // Lien entre le nombre de pointes (total) et l'octave
+            let octave = 7 - Math.floor(total / 10);
+            octave = utils.clamp(octave, 1, 7);
+            const fullNote = randomNoteChar + octave;
+            
+            // Lien entre le rayon (r1) et la durée
+            const duration = r1 / 25; 
+
+            // On joue la note calculée avec la durée calculée
+            synth.triggerAttackRelease(fullNote, duration);
+            // --- FIN DE LA MODIFICATION ---
+
+            const randomColor = `hsl(${utils.random(0, 360)}, 70%, 50%)`;
+            $path1.style.stroke = randomColor;
+        
+            utils.set($path2, { points: generatePoints(total, r1) });
+            
+            animate($path1, {
+                points: svg.morphTo($path2),
+                ease: 'outElastic(1, .6)', 
+                duration: 800 
+            }); 
+        }
+        
+        let bounds = $zone.getBoundingClientRect();
+        const refreshBounds = () => bounds = $zone.getBoundingClientRect();
+
+        const animatablePoly = createAnimatable($polyContainer, {
+            translateX: 800, 
+            translateY: 800, 
+            ease: 'out(4)', 
+        });
+
+        const onMouseMove = e => {
+            const { width, height, left, top } = bounds;
+            const hw = width / 2;
+            const hh = height / 2;
+            
+            // Marge de sécurité conservée pour l'affichage correct
+            const safeMargin = 70; 
+            
+            const x = utils.clamp(e.clientX - left - hw, -hw + safeMargin, hw - safeMargin);
+            const y = utils.clamp(e.clientY - top - hh, -hh + safeMargin, hh - safeMargin);
+            
+            animatablePoly.translateX(x);
+            animatablePoly.translateY(y);
+            
+            animatablePoly.rotate(x * 0.05);
+        }
+
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('resize', refreshBounds);
+        $zone.addEventListener('click', animateRandomPoints);
+        
+        refreshBounds();
+
+    </script>
+</body>
+</html>
