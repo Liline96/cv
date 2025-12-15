@@ -12,8 +12,7 @@ Gemini 3.0 mode raisonnement
 
 ### source 
 
-- [Using On-Screen Buttons & Sliders to control Tone and P5]
-(https://www.youtube.com/watch?v=kyJoJy2CpJc)
+[Using On-Screen Buttons & Sliders to control Tone and P5](https://www.youtube.com/watch?v=kyJoJy2CpJc)
 - [Sound triggering, FX and Recording with Tone.js [HTML/CSS/Javascript]]
 (https://www.youtube.com/watch?v=QklWIeZLZYY)
 
