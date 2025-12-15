@@ -24,21 +24,24 @@ En dehors de l'objectif d'avoir une animation fonctionnelle qui suit le curseur,
 - Expérimentation sur JsBin pour visualiser la page et éditer le code
 - Débogage sur Visual Studio Code 
 - S'il y a un blocage d'utilisation de Gemini pour mieux comprendre le code, expliquer et corriger.
-- retour à Expérimenter sur Jsbin
+- retour à expérimenter sur Jsbin
 https://gemini.google.com/share/c3b671215c15
 
 
 ### Réalisation 
-- Lecture de la bibliographie de animejs
+- Lecture de la bibliographie d'animejs
 - Explication du fonctionnement de chaque code
+  "Explique en détail le fonctionnement du module anime.js "morpheTo" (https://animejs.com/documentation/svg/morphto)
 - Essaie sur Jsbin du deuxième code (https://animejs.com/documentation/animatable) en prenant la base du 1er code (à partir d'import).
+  "Explique en détail le fonctionnement du module anime.js "createAnimatable" (https://animejs.com/documentation/animatable)
 - Tentative de création des 2 codes en 1
+  "Est-ce qu'il est possible de lier les deux codes pour faire  en sorte que "
 - Demande à Gemini d'expliquer chaque étape du code avec le prompt "explique comment fonctionne chaque étape de ce code"
 - rédaction du code sur les mouvements de la souris basé sur le code gemini mais modification des valeurs const zone et poly manuellement 
 - Modification du SVG manuellement
 - utilisation d'un math random pour générer 6 chiffre pour code HEX
-- random.color crée par Visual Studio Code et modifié manuellement
-- Ajout d'un paramètre pour modfier la forme du polygone à chaque clic de souris
+- random.color créé par Visual Studio Code et modifié manuellement
+- Prompt sur Gemini "Ajoute un paramètre pour modifier la forme du polygone à chaque clic de souris"
 
 ### Axe d'amélioration 
 - Ajouter des commentaires plus clairs qui explique bien le code
@@ -46,21 +49,6 @@ https://gemini.google.com/share/c3b671215c15
 - Créer un <background> qui change de couleur en fonction de la taille de la fenêtre dans <style> avec valeur px min et max
 
 
-##Conception 25/11
-### Objectifs
-Ajouter des sons avec Tone.js   
-
-### Outils 
-- JsBin 
-- Gemini 3 Pro
-- Reddit
-- Youtube Getting Started with Tone.js | Web Audio Tutorial  https://www.youtube.com/watch?v=ftGuDvm5zDQ
-
-### Réalisation 
-- Lecture de la bibliographie (https://tonejs.github.io)(https://tonejs.github.io/docs/15.1.22/classes/Synth.html)
-- Vidéo youtube pour comprendre le fonctionnement de tone.js Getting Started with Tone.js | Web Audio Tutorial - Pt.1 à 4
-- Prompt Gemini écrit en fonction des connaissances acquises (https://g.co/gemini/share/0e82fe070a8d)
-- Essais sur JS.bin et sur le lien https://liline96.github.io/cv/testprojet2.html
 
 
 
