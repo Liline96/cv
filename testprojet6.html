@@ -27,7 +27,7 @@
             top: 20px; /* Un peu d'espace depuis le haut */
             left: 50%; /* Centré horizontalement */
             transform: translateX(-50%);
-            width: 100px;
+            width: 120px;
             height: 25px; /* Hauteur confortable pour le texte */
             background-color: #e0e0e0; 
             border: 1px solid #ccc;
@@ -91,13 +91,20 @@
             #zone { background-color: #000; }
             #poly { stroke: #FFF; }
         }
+        .split-char {
+            color: var(--hex-current-1);
+            background-color: var(--hex-current-3);
+            outline: 1px solid var(--hex-current-2);
+            border-radius: .25rem;
+        }        
+      
     </style>
 </head>
 <body>
 
     <div id="theme-toggle" title="Changer le thème"></div>
 
-    <div class="instruction">Cliquez au centre pour le son</div>
+    <div class="instruction">cliquez sur le bouton droit de la souris</div>
 
     <svg id="zone">
         <g id="center-group">
@@ -111,7 +118,7 @@
     </svg>
 
     <script type="module">
-        import { animate, svg, utils, createAnimatable } from 'https://esm.sh/animejs';
+        import { animate, svg, utils, createAnimatable, stagger, splitText} from 'https://esm.sh/animejs';
         import * as Tone from 'https://esm.sh/tone';
 
         const [ $path1, $path2 ] = utils.$('polygon');
@@ -233,6 +240,15 @@
         $zone.addEventListener('click', animateRandomPoints);
         
         refreshBounds();
+        
+        splitText('.instruction', {
+            chars: { class: 'split-char' }
+        });
+        animate('.split-char', {
+            y: ['0rem', '-1rem', '0rem'],
+            loop: true,
+            delay: stagger(100, { start: 500 })
+        });
 
     </script>
 </body>
