@@ -13,7 +13,7 @@
         body {
             margin: 0;
             padding: 0;
-            background-color: #111; 
+            background-color: #FFFFFF;
             height: 100vh;
             width: 100vw;
             overflow: hidden; 
@@ -21,21 +21,20 @@
             position: relative;
         }
 
-        /* --- NOUVEAU STYLE DU BOUTON --- */
+        /* --- STYLE DU BOUTON THEME --- */
         #theme-toggle {
             position: absolute;
-            top: 20px; /* Un peu d'espace depuis le haut */
-            left: 50%; /* Centré horizontalement */
+            top: 20px; 
+            left: 50%; 
             transform: translateX(-50%);
             width: 120px;
-            height: 25px; /* Hauteur confortable pour le texte */
+            height: 25px; 
             background-color: #e0e0e0; 
             border: 1px solid #ccc;
-            border-radius: 15px; /* Bords arrondis */
+            border-radius: 15px; 
             cursor: pointer;
             z-index: 100;
             
-            /* Centrage du texte/emoji à l'intérieur du bouton */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -43,32 +42,72 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             transition: all 0.3s ease;
             user-select: none;
+            color: #000;
         }
         
         #theme-toggle:hover {
-            background-color: #d0d0d0;
+            filter: brightness(0.9);
             box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
 
+        /* --- STYLE DES BOUTONS AUDIO --- */
+        #audio-controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            display: flex;
+            gap: 10px;
+        }
+
+        .audio-btn {
+            background-color: #e0e0e0;
+            color: #000;
+            border: 1px solid #ccc;
+            border-radius: 15px;
+            cursor: pointer;
+            padding: 5px 15px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .audio-btn:hover {
+            filter: brightness(0.9);
+        }
+
+        .audio-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            filter: none;
+        }
+
+        /* --- TEXTE INSTRUCTION --- */
         .instruction {
             position: absolute;
-            top: 60px; /* Décalé vers le bas pour ne pas être sous le bouton */
+            top: 60px; 
             width: 100%;
             font-size: 15px;
-            color: #888;
+            color: #333333;
             text-align: center;
             pointer-events: none;
             z-index: 10;
             transition: color 0.5s ease;
         }
 
+        .split-char {
+            display: inline-block; 
+        }        
+
+        /* --- ZONE SVG --- */
         #zone {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #FFFFFF; /* Couleur initiale */
+            background-color: #FFFFFF; 
             cursor: pointer;
             z-index: 1;
             overflow: visible; 
@@ -91,18 +130,16 @@
             #zone { background-color: #000; }
             #poly { stroke: #FFF; }
         }
-        .split-char {
-            color: var(--hex-current-1);
-            background-color: var(--hex-current-3);
-            outline: 1px solid var(--hex-current-2);
-            border-radius: .25rem;
-        }        
-      
     </style>
 </head>
 <body>
 
-    <div id="theme-toggle" title="Changer le thème"></div>
+    <div id="theme-toggle" title="Changer le thème">🌙 Mode Sombre</div>
+
+    <div id="audio-controls">
+        <button id="btnRec" class="audio-btn">🔴 Rec</button>
+        <button id="btnPlay" class="audio-btn" disabled>▶️ Play</button>
+    </div>
 
     <div class="instruction">cliquez sur le bouton droit de la souris</div>
 
@@ -110,7 +147,7 @@
         <g id="center-group">
             <g id="poly-container">
                 <g id="poly">
-                     <polygon id="path-1" points="0,-52 18,-18 52,0 18,18 0,52 -18,18 -52,0 -18,-18"></polygon>
+                      <polygon id="path-1" points="0,-52 18,-18 52,0 18,18 0,52 -18,18 -52,0 -18,-18"></polygon>
                     <polygon style="opacity: 0" id="path-2" points="0,-52 18,-18 52,0 18,18 0,52 -18,18 -52,0 -18,-18"></polygon>
                 </g>
             </g>
@@ -127,46 +164,107 @@
         const $toggleBtn = document.querySelector('#theme-toggle');
         const $instruction = document.querySelector('.instruction');
         const $poly = document.querySelector('#poly');
+        
+        const $audioButtons = document.querySelectorAll('.audio-btn');
 
         // --- GESTION DU THEME ---
         let isDarkMode = false;
         
-        // État initial du bouton : On est en clair, donc on propose le sombre
-        $toggleBtn.textContent = '🌙 Mode Sombre';
-
         $toggleBtn.addEventListener('click', () => {
             isDarkMode = !isDarkMode;
             
             if (isDarkMode) {
-                // Passage au Mode Sombre
+                // MODE SOMBRE
                 $zone.style.backgroundColor = '#111111';
                 $instruction.style.color = '#FFFFFF';
-                // Le bouton propose maintenant le mode clair
+                $poly.style.stroke = '#FFFFFF'; 
+
                 $toggleBtn.textContent = '☀️ Mode Clair';
-                // Optionnel : changer le style du bouton lui-même
                 $toggleBtn.style.backgroundColor = '#333';
                 $toggleBtn.style.color = '#fff';
                 $toggleBtn.style.border = '1px solid #555';
 
+                $audioButtons.forEach(btn => {
+                    btn.style.backgroundColor = '#333';
+                    btn.style.color = '#fff';
+                    btn.style.border = '1px solid #555';
+                });
+
             } else {
-                // Passage au Mode Clair (Défaut)
+                // MODE CLAIR
                 $zone.style.backgroundColor = '#FFFFFF';
                 $instruction.style.color = '#333333';
-                // Le bouton propose maintenant le mode sombre
+                $poly.style.stroke = '#333';
+
                 $toggleBtn.textContent = '🌙 Mode Sombre';
-                // Reset du style du bouton
                 $toggleBtn.style.backgroundColor = '#e0e0e0';
                 $toggleBtn.style.color = '#000';
                 $toggleBtn.style.border = '1px solid #ccc';
+
+                $audioButtons.forEach(btn => {
+                    btn.style.backgroundColor = '#e0e0e0';
+                    btn.style.color = '#000';
+                    btn.style.border = '1px solid #ccc';
+                });
             }
         });
 
-        // --- SON & ANIMATION (Reste inchangé) ---
+        // --- SON & ANIMATION ---
         const synth = new Tone.Synth({
             oscillator: { type: "fmsine" },
             envelope: { attack: 0.05, decay: 0.1, sustain: 0.3, release: 1 }
         }).toDestination();
 
+        // --- ENREGISTREMENT ---
+        const dest = Tone.context.createMediaStreamDestination();
+        Tone.getDestination().connect(dest);
+
+        // --- CORRECTION SILENCE ---
+        // On crée un oscillateur qui ne fait aucun bruit (volume 0) 
+        // mais qui envoie des données en continu à l'enregistreur.
+        // Cela force le navigateur à respecter le temps qui passe.
+        const silentOsc = new Tone.Oscillator(0);
+        silentOsc.volume.value = -Infinity; // On s'assure qu'il est muet
+        silentOsc.connect(dest); // Connecté uniquement à l'enregistreur
+        silentOsc.start(); // Il tourne en permanence en arrière-plan
+        // --------------------------
+        
+        let recorder = new MediaRecorder(dest.stream);
+        let chunks = [];
+        let audioURL;
+        const btnRec = document.querySelector('#btnRec');
+        const btnPlay = document.querySelector('#btnPlay');
+
+        recorder.ondataavailable = (e) => chunks.push(e.data);
+        
+        recorder.onstop = () => {
+            const blob = new Blob(chunks, { type: 'audio/webm' });
+            chunks = [];
+            audioURL = URL.createObjectURL(blob);
+            btnPlay.disabled = false;
+        };
+
+        btnRec.addEventListener('click', async () => {
+            await Tone.start();
+            
+            if (recorder.state === 'inactive') {
+                recorder.start();
+                btnRec.textContent = '⏹️ Stop';
+                btnPlay.disabled = true;
+            } else {
+                recorder.stop();
+                btnRec.textContent = '🔴 Rec';
+            }
+        });
+
+        btnPlay.addEventListener('click', () => {
+            if (audioURL) {
+                const audio = new Audio(audioURL);
+                audio.play();
+            }
+        });
+
+        // --- LOGIQUE D'ANIMATION ---
         function generatePoints(total, r1) {
             const r2 = 56; 
             const isOdd = n => n % 2;
@@ -244,10 +342,11 @@
         splitText('.instruction', {
             chars: { class: 'split-char' }
         });
+        
         animate('.split-char', {
-            y: ['0rem', '-1rem', '0rem'],
+            y: ['0rem', '-10px', '0rem'], 
             loop: true,
-            delay: stagger(100, { start: 500 })
+            delay: stagger(100, { start: 0 })
         });
 
     </script>
