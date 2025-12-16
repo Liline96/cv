@@ -9,7 +9,7 @@ Mon projet de développement consistera à une animation Javascript d'une forme 
 ### Objectifs
 En dehors de l'objectif d'avoir une animation fonctionnelle qui suit le curseur, la forme devra :
 - Changer de couleurs périodiquement 
-- changer de forme après un click de souris 
+- changer de forme après un clic de souris 
 
 ## Conception 18/11 
 ### Outils 
