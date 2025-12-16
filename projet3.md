@@ -8,5 +8,5 @@
 - Gemini 3 Pro avec Gem "Partenaire de code"
   
 ## Réalisation 
-- inverser les valeurs
+- inversion des valeurs pour le background 
 - prompt "ajoute une phrase d'instruction en haut qui s'intègre bien "
