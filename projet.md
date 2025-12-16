@@ -43,6 +43,46 @@ https://gemini.google.com/share/c3b671215c15
 - random.color créé par Visual Studio Code et modifié manuellement
 - Prompt sur Gemini "Ajoute un paramètre pour modifier la forme du polygone à chaque clic de souris"
 
+## Flowchart
+
+```mermaid
+flowchart TD
+    %% --- DÉBUT ---
+    Start([Début du Programme]) --> Init[Initialisation :<br/>Sélection des variables DOM<br/>$zone, $poly, $path1]
+    
+    Init --> Bounds[Calcul initial :<br/>Limites de la zone 'bounds']
+    
+    Bounds --> Listeners[Action :<br/>Activation des écouteurs<br/>Mouse, Click, Resize]
+    
+    Listeners --> Wait{En attente<br/>d'événement}
+
+    %% --- BRANCHE 1 : MOUVEMENT ---
+    Wait -- "Souris bouge" --> InputMouse[/Entrée :<br/>Coordonnées X, Y/]
+    InputMouse --> CalcMath[Calcul :<br/>Position relative + Clamp]
+    CalcMath --> MovePoly[/Sortie :<br/>Mise à jour visuelle $poly/]
+    MovePoly --> Wait
+
+    %% --- BRANCHE 2 : CLIC ---
+    Wait -- "Clic détecté" --> GenColor[Calcul :<br/>Couleur Aléatoire HSL]
+    GenColor --> SetColor[/Sortie :<br/>Appliquer couleur sur $path1/]
+    SetColor --> GenShape[Calcul :<br/>Générer coordonnées géométriques]
+    GenShape --> SetHidden[/Sortie :<br/>Mettre à jour forme invisible $path2/]
+    SetHidden --> AnimeJS[Action :<br/>Lancer Animation Morphing]
+    AnimeJS --> Wait
+
+    %% --- BRANCHE 3 : MAINTENANCE ---
+    Wait -- "Redimensionnement" --> Refresh[Calcul :<br/>Mise à jour variable 'bounds']
+    Refresh --> Wait
+
+    %% Styles pour respecter le standard visuel
+    style Start fill:#fff,stroke:#333,stroke-width:2px
+    style Wait fill:#fff,stroke:#333,stroke-width:2px
+    style Init fill:#e1f5fe,stroke:#01579b
+    style InputMouse fill:#e8f5e9,stroke:#2e7d32
+    style MovePoly fill:#e8f5e9,stroke:#2e7d32
+    style SetColor fill:#fce4ec,stroke:#c2185b
+    style SetHidden fill:#fce4ec,stroke:#c2185b
+```
 ### Axe d'amélioration 
 - Ajouter des commentaires plus clairs qui explique bien le code
 - Modifier le SVG pour qu'il prenne soit toute la page, soit qu'il soit dans un rectangle avec une animation du polygone moins grand (résolution du conflit entre les pixels du polygone et les pixels du SVG soit création d'un id pour le SVG et formatage CSS dans <style> avec taille fixe en px ou vh/vw).
