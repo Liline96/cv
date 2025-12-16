@@ -25,7 +25,7 @@
             position: absolute;
             top: 30px;
             font-size: 15px;
-            color: #000000; /* Couleur par défaut (écran > 1200px) */
+            color: #000000;
             transition: color 0.5s ease;
             pointer-events: none;
             text-align: center;
@@ -38,11 +38,10 @@
             border-radius: 8px;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
             cursor: pointer;
-            background-color: #F0F0F0; /* Couleur par défaut (écran > 1200px) */
+            background-color: #F0F0F0;
             transition: background-color 0.5s ease;
-        }   
+        }    
 
-        /* --- MODIFICATION ICI : Seuil passé à 1200px --- */
         @media (max-width: 700px) {
             .instruction {
                 color: #F0F0F0;
@@ -133,21 +132,41 @@
         let bounds = $zone.getBoundingClientRect();
         const refreshBounds = () => bounds = $zone.getBoundingClientRect();
         
-        const polyanim = createAnimatable($poly,{
-            x: 500,
-            y: 500,
-            ease: 'out(3)',
+        const polyanim = createAnimatable($poly, {
+            x: 0, 
+            y: 0
         });
                 
+        // 1. Initialisation
+        let targetX = 0, targetY = 0;
+        let currentX = 0, currentY = 0;
+
+        // 2. Écouteur souris
         const onMouseMove = e => {
             const { width, height, left, top } = bounds;
             const hw = width / 2;
             const hh = height / 2;            
-            const x = utils.clamp(e.clientX - left - hw, -hw, hw);
-            const y = utils.clamp(e.clientY - top - hh, -hh, hh);
-            polyanim.x(x);
-            polyanim.y(y);
+            targetX = utils.clamp(e.clientX - left - hw, -hw, hw);
+            targetY = utils.clamp(e.clientY - top - hh, -hh, hh);
         }
+
+        // 3. Boucle d'animation
+        const tick = () => {
+            requestAnimationFrame(tick);
+
+            // --- MODIFICATION ICI ---
+            // J'ai baissé de 0.08 à 0.02.
+            // Plus c'est bas, plus c'est fluide/lent.
+            const easeFactor = 0.02; 
+
+            currentX += (targetX - currentX) * easeFactor;
+            currentY += (targetY - currentY) * easeFactor;
+
+            polyanim.x(currentX);
+            polyanim.y(currentY);
+        }
+
+        tick();
         
         window.addEventListener('mousemove', onMouseMove);
         window.addEventListener('scroll', refreshBounds); 
