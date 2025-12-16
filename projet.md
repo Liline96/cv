@@ -31,9 +31,9 @@ https://gemini.google.com/share/c3b671215c15
 ### Réalisation 
 - Lecture de la bibliographie d'animejs
 - Explication du fonctionnement de chaque code
-  "Explique en détail le fonctionnement du module anime.js "morpheTo" (https://animejs.com/documentation/svg/morphto)
+  "Explique en détail le fonctionnement du module anime.js ["morpheTo"](https://animejs.com/documentation/svg/morphto)
 - Essaie sur Jsbin du deuxième code (https://animejs.com/documentation/animatable) en prenant la base du 1er code (à partir d'import).
-  "Explique en détail le fonctionnement du module anime.js "createAnimatable" (https://animejs.com/documentation/animatable)
+  "Explique en détail le fonctionnement du module anime.js ["createAnimatable"](https://animejs.com/documentation/animatable)
 - Tentative de création des 2 codes en 1
   "Est-ce qu'il est possible de lier les deux codes pour faire  en sorte que "
 - Demande à Gemini d'expliquer chaque étape du code avec le prompt "explique comment fonctionne chaque étape de ce code"
