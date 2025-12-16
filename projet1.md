@@ -10,7 +10,7 @@ Reddit
 
 ## Source 
 - [Youtube Getting Started with Tone.js | Web Audio Tutorial  - Pt.1 à 4] (https://www.youtube.com/watch?v=ftGuDvm5zDQ)
-- Lecture de la bibliographie (https://tonejs.github.io)
+- [Lecture de la bibliographie] (https://tonejs.github.io)
 - [Class Synth<Options>](https://tonejs.github.io/docs/15.1.22/classes/Synth.html)
 
 ## Réalisation
